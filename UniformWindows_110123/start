@@ -1,0 +1,71 @@
+#!/bin/bash
+
+##########################################################################################
+#
+# Run an (initialized) job, starting from wherever it left off.
+# Importantly, this script knows to use slurm if it is available,
+#   but will run locally if it is not.
+#
+# Usage:
+#   ./start <jobdir>
+#
+##########################################################################################
+
+JOBDIR=$1
+JOBNAME=$(basename $JOBDIR)
+
+if [ -f "$JOBDIR/running" ]
+then
+    echo "Did not start $JOBDIR. It appears to already be running."
+    exit 1
+fi
+touch "$JOBDIR/running"     # FLAG JOB AS RUNNING. To be removed by `start__slurm`.
+
+# NOTE: The "running" flag is a safety valve, not a guarantee.
+#   The idea is to not accidentally start the same job twice,
+#       thus asking multiple sub-processes to interact wtih the directory's files.
+#   If something catastrophic terminates `start__slurm` early,
+#       there is no such danger, but the `running` flag will still be there.
+#   In such an event, it can be safely removed, and you can restart the job at lesiure.
+
+
+
+if command -v sbatch &> /dev/null
+then
+    sbatch --job-name "$JOBNAME" start__slurm "$@"
+
+    # TODO: accept walltime as another arg?
+
+else    # MOCK A SLURM JOB
+    ######################################################################################
+    # Slurm provides two relevant environment variables:
+    #   1. `SLURM_JOB_ID`, which identifies the job.
+    #       It need not be strictly unique for local runs, so the JOBNAME suits fine.
+    #   2. `TMPDIR`, which gives a scratch location.
+    export SLURM_JOB_ID=$JOBNAME
+    export TMPDIR="/tmp"
+
+    ######################################################################################
+    # My slurm script uses three non-trivial commands:
+    #   1. HPC-provided `module` to manage environment
+    #   2. Slurm-provided `squeue` to get the walltime.
+    #   3. Linux-provided `timeout` to prematurely end a command.
+
+    # Presumably Julia is available if running locally, so `module` needn't do anything.
+    module() { echo ""; }
+    export -f module
+
+    # My script uses `squeue` to get a time, so the mock only provides a plausible time.
+    squeue() { echo "00:15:00"; }
+    export -f squeue
+
+    # Running locally, we needn't feel guilty about running forever.
+    # So `timeout` need only execute the command argument.
+    timeout() { "${@:2}"; }
+    export -f timeout
+
+    ######################################################################################
+    echo "Mocking slurm job $JOBDIR"
+    SLURM_OUT="slurm-${JOBNAME}.out"
+    ./start__slurm "$@" > $SLURM_OUT &
+fi
