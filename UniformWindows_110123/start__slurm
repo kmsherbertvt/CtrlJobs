@@ -23,7 +23,7 @@ WALLTIME=$(squeue -h -j $SLURM_JOB_ID -o "%l")  # GIVES WALLTIME IN hh::mm:ss FO
 # LOAD MODULES
 sleep 2                                         # GIVE TINKERCLIFFS A MOMENT TO WAKE UP
 module reset                                    # Not sure this is necessary..?
-module load Julia/1.7.2-linux-x86_64            # LOAD JULIA
+module load Julia/1.9.3-linux-x86_64            # LOAD JULIA
 
 # PREPARE PATHS
 PROJDIR=$(pwd)                                  # MASTER DIRECTORY WHERE WE SAVE ALL JOBS
