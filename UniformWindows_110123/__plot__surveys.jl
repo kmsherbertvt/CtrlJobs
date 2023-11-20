@@ -16,7 +16,7 @@ default_series = (
     Major ticks are selected to have approximately no more than ten labels total.
 """
 function __initplot__T_axis(TMIN, TMAX, Δs)
-    labelskip = round(Int, (TMAX - TMIN) / Δs) ÷ 10
+    labelskip = 1+ round(Int, (TMAX - TMIN) / Δs) ÷ 10
     return (
         xlims = [TMIN,TMAX],
         xticks = TMIN:labelskip*Δs:TMAX,
@@ -46,11 +46,11 @@ __initplot__iterations(; kwargs...) = Plots.plot(;
     kwargs...
 )
 
-function init_plots(TMIN, TMAX, Δs)
-    kwargs = __initplot__T_axis(TMIN, TMAX, Δs)
+function init_plots(TMIN, TMAX, Δs; kwargs...)
+    T_axis = __initplot__T_axis(TMIN, TMAX, Δs)
     return (
-        energy = __initplot__energy(; kwargs...),
-        iterations = __initplot__iterations(; kwargs...),
+        energy = __initplot__energy(; T_axis..., kwargs...),
+        iterations = __initplot__iterations(; T_axis..., kwargs...),
     )
 end
 
@@ -128,3 +128,16 @@ plot_survey!(plots, "jobs/lih30_resonant_largerspacing_ΔsMAX3.0";
 plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX1.5";
     label="Doubled Windows", color=4, linestyle=:solid, shape=:star)
 save_plots(plots, "device")
+
+
+# HUBBARD LATTICE REFERENCE/BASIS CHOICE
+plots = init_plots(42.0, 66.0, 3.0)#; legend=:bottomleft)
+plot_survey!(plots, "jobs/cL4tAPm_resonant_ΔsMAX3.0";
+    label="Small u, atomic orbitals", color=1, linestyle=:solid, shape=:square)
+plot_survey!(plots, "jobs/cL4tCPm_resonant_ΔsMAX3.0";
+    label="Small u, core orbitals", color=2, linestyle=:dot, shape=:square)
+plot_survey!(plots, "jobs/cL4UAPm_resonant_ΔsMAX3.0";
+    label="Large u, atomic orbitals", color=3, linestyle=:solid, shape=:circle)
+plot_survey!(plots, "jobs/cL4UCPm_resonant_ΔsMAX3.0";
+    label="Large u, core orbitals", color=4, linestyle=:dot, shape=:circle)
+save_plots(plots, "basischoice")
