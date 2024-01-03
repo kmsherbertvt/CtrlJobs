@@ -174,7 +174,10 @@ module Variables
         for i in 1:nD
             # CALCULATE LARGEST Ω OVER ALL WINDOWS IN PULSE
             pulse = CtrlVQE.drivesignal(work.device, i)
-            Ωmax[i] = maximum(s -> abs(pulse(s)), pulse.starttimes)
+            # TODO: Who signed off on this?! Needs to be type-agnostic.
+            # Ωmax[i] = maximum(s -> abs(pulse(s)), pulse.starttimes)
+            # TODO: This is a hack solution but we should use work variables more wisely.
+            Ωmax[i] = maximum(abs.(CtrlVQE.valueat(pulse, CtrlVQE.lattice(work.grid))))
 
             # FETCH DRIVE FREQUENCY OF PULSE
             ν[i] = CtrlVQE.drivefrequency(vars.work.device, i)
