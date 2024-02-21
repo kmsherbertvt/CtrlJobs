@@ -123,10 +123,11 @@ module UniformWindows_110123
                 isfile("$(vars.outdir)/running") ? "R ** " :
                 "- *** "
             if !isnothing(vars.trace) && !isempty(vars.trace.iterations)
+                I = last(vars.trace.iterations)
                 E = last(vars.trace.energy)
                 fn = last(vars.trace.fn)
                 gd = last(vars.trace.gd)
-                println("$flag\t$(vars.outdir)\t\tE=$E\tfn=$fn\tgd=$gd")
+                println("$flag\t$(vars.outdir)\t\tI=$I\tE=$E\tfn=$fn\tgd=$gd")
             else
                 println("$flag\t$(vars.outdir)")
             end
