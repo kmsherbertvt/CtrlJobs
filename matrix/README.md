@@ -71,6 +71,13 @@ The presence of an m after the mapping indicates whether a two-qubit tapering wa
     Frozen core and Qiskit parity mapping with 2-qubit tapering. Total of 4 qubits.
 - "H215": H2 with a bond separation of 1.5Å.
     OpenFermion parity mapping with 2-qubit tapering. Total of 4 qubits.
+- "scan_...": A scan over chemical difficulty for a particular type of molecule.
+  All these use parity mapping and 2-qubit tapering (via openfermion unless otherwise noted).
+  - "LiH": LiH with variable bond distance, frozen core and Qiskit mapping.
+  - "H4": Linear H4 with variable bond distance.
+  - "H6": Linear H6 with variable bond distance.
+  - "cH6": Cyclic H6 with variable bond distance.
+  - "cL6": Hubbard model with periodic boundary conditions, variable u=U/4t.
 
 ## Sectors
 

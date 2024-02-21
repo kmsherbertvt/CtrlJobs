@@ -173,11 +173,24 @@ module Systems
         ),
         # OTHERS
         r"lih30" => (regex_match) -> get_suffix(6, 4, 2, "P-m"),
+        r"scan_LiH_(.+)" => (regex_match) -> get_suffix(6, 4, 2, "P-m"),
             #= NOTE: These are not really the correct mapping!
                 The "lih30.npy" matrix was generated using qiskit's tapering,
                     not openfermion's, so these sector matrices are totally wrong.
-                    Ignore them when studying this molecule! =#
+                    Ignore them when studying this molecule!
+
+                NOTE: I've discovered, very belatedly, that the LiH matrix
+                        actually has just two electrons
+                        (the other two were integrated out in the qiskit code),
+                        so we *ought* to have called the reference "QKA_6_2_1".
+                    But the name itself is just a label,
+                        so there is no pressing need to fix it.
+                    =#
         r"H215" => (regex_match) -> get_suffix(4, 2, 1, "P-m"),
+        r"scan_H4_(.+)" => (regex_match) -> get_suffix(8, 4, 2, "P-m"),
+        r"scan_H6_(.+)" => (regex_match) -> get_suffix(12, 6, 3, "P-m"),
+        r"scan_cH6_(.+)" => (regex_match) -> get_suffix(12, 6, 3, "P-m"),
+        r"scan_cL6_(.+)" => (regex_match) -> get_suffix(12, 6, 3, "P-m"),
     )
 
     """ Map regex patterns of a model code onto a function,
@@ -193,7 +206,12 @@ module Systems
         ),
         # OTHERS
         r"lih30" => (regex_match) -> "QKA",
+        r"scan_LiH_(.+)" => (regex_match) -> "QKA",
         r"H215" => (regex_match) -> "REF",
+        r"scan_H4_(.+)" => (regex_match) -> "REF",
+        r"scan_H6_(.+)" => (regex_match) -> "REF",
+        r"scan_cH6_(.+)" => (regex_match) -> "REF",
+        r"scan_cL6_(.+)" => (regex_match) -> "REF",
     )
 
 end
