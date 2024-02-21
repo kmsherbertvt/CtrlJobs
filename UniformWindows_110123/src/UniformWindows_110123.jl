@@ -122,7 +122,14 @@ module UniformWindows_110123
                 is_terminated(vars) ? "T *  " :
                 isfile("$(vars.outdir)/running") ? "R ** " :
                 "- *** "
-            println("$flag\t$(vars.outdir)")
+            if !isnothing(vars.trace) && !isempty(vars.trace.iterations)
+                E = last(vars.trace.energy)
+                fn = last(vars.trace.fn)
+                gd = last(vars.trace.gd)
+                println("$flag\t$(vars.outdir)\t\tE=$E\tfn=$fn\tgd=$gd")
+            else
+                println("$flag\t$(vars.outdir)")
+            end
         end
     end
 
@@ -136,6 +143,12 @@ module UniformWindows_110123
     function inspect_all(path="jobs")
         for job in eachjob(path)
             inspect(load(job))
+        end
+    end
+
+    function summarize_all(path="jobs")
+        for job in eachjob(path)
+            summarize(load(job))
         end
     end
 

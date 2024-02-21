@@ -4,6 +4,7 @@ authors = ["kmsherbertvt <kyle.sherbert@vt.edu>"]
 version = "0.1.0"
 
 [deps]
+ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 CtrlVQE = "b0286c9f-ec41-4a06-9137-e6f7f9cecc08"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
