@@ -52,12 +52,24 @@ jobdirs = (
     #############
     # lih30
     #############
-    R   = "jobs/lih30_resonant.real_ΔsMAX1.5/T30.0_W20",
-    RF  = "jobs/lih30_detuned.real_ΔsMAX1.5/T30.0_W20",
-    RI  = "jobs/lih30_resonant_ΔsMAX3.0/T30.0_W10",
-    RIF = "jobs/lih30_detuned_ΔsMAX3.0/T30.0_W10",
-    MP  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T30.0_W10",
-    MPF = "jobs/lih30_detuned.polar_ΔsMAX3.0/T30.0_W10",
+    α_12   = "jobs/lih30_resonant.real_ΔsMAX1.5/T12.0_W8",
+    αΔ_12  = "jobs/lih30_detuned.real_ΔsMAX1.5/T12.0_W8",
+    αβ_12  = "jobs/lih30_resonant_ΔsMAX3.0/T12.0_W4",
+    αβΔ_12 = "jobs/lih30_detuned_ΔsMAX3.0/T12.0_W4",
+    Aϕ_12  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T12.0_W4",
+    # AϕΔ = "jobs/lih30_detuned.polar_ΔsMAX3.0/T30.0_W10",
+
+    α_30   = "jobs/lih30_resonant.real_ΔsMAX1.5/T30.0_W20",
+    αΔ_30  = "jobs/lih30_detuned.real_ΔsMAX1.5/T30.0_W20",
+    αβ_30  = "jobs/lih30_resonant_ΔsMAX3.0/T30.0_W10",
+    αβΔ_30 = "jobs/lih30_detuned_ΔsMAX3.0/T30.0_W10",
+    Aϕ_30  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T30.0_W10",
+
+    α_48   = "jobs/lih30_resonant.real_ΔsMAX1.5/T48.0_W32",
+    αΔ_48  = "jobs/lih30_detuned.real_ΔsMAX1.5/T48.0_W32",
+    αβ_48  = "jobs/lih30_resonant_ΔsMAX3.0/T48.0_W16",
+    αβΔ_48 = "jobs/lih30_detuned_ΔsMAX3.0/T48.0_W16",
+    Aϕ_48  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T48.0_W16",
 )
 
 ##########################################################################################
@@ -203,3 +215,16 @@ Gar can we just ask what is the total projection into each basis from all real p
 
 
 =#
+
+
+goodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(svds))
+goodranks = NamedTuple(job => length(δ) for (job, δ) in pairs(goodδs))
+maxδs = NamedTuple(job => first(δ) for (job,δ) in pairs(goodδs))
+goodconditions = NamedTuple(job => first(δ) / last(δ) for (job, δ) in pairs(goodδs))
+
+
+
+initgoodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(initsvds))
+initgoodranks = NamedTuple(job => length(δ) for (job, δ) in pairs(initgoodδs))
+initmaxδs = NamedTuple(job => first(δ) for (job,δ) in pairs(initgoodδs))
+initgoodconditions = NamedTuple(job => first(δ) / last(δ) for (job, δ) in pairs(initgoodδs))

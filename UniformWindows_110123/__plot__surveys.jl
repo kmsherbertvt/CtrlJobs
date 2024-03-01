@@ -1,6 +1,7 @@
 #= Plot data from many choices of `T` as a single curve. =#
 
 import Plots
+import ColorSchemes
 
 default_series = (
     label = false,
@@ -46,15 +47,15 @@ __initplot__iterations(; kwargs...) = Plots.plot(;
     kwargs...
 )
 
-function init_plots(TMIN, TMAX, Δs; kwargs...)
+function init_plots(TMIN, TMAX, Δs; energy=Dict(), iter=Dict(), kwargs...)
     T_axis = __initplot__T_axis(TMIN, TMAX, Δs)
     return (
-        energy = __initplot__energy(; T_axis..., kwargs...),
-        iterations = __initplot__iterations(; T_axis..., kwargs...),
+        energy = __initplot__energy(; T_axis..., kwargs..., energy...),
+        iterations = __initplot__iterations(; T_axis..., kwargs..., iter...),
     )
 end
 
-function plot_survey!(plots, surveydir; kwargs...)
+function plot_survey!(plots, surveydir; energy=Dict(), iter=Dict(), kwargs...)
     system = Ref{JOB.System}()
 
     # INITIALIZE RESULT VECTORS
@@ -65,6 +66,7 @@ function plot_survey!(plots, surveydir; kwargs...)
     )
 
     for jobdir in readdir(surveydir, join=true)
+        endswith(jobdir, ".DS_Store") && continue
         # LOAD VARIABLES AND (IF NECESSARY) THE SYSTEM
         vars = JOB.load(jobdir)
         isnothing(vars.trace) && continue
@@ -81,8 +83,10 @@ function plot_survey!(plots, surveydir; kwargs...)
     for array in data; permute!(array, σ); end
 
     # PLOT DATA
-    Plots.plot!(plots.energy, data.T, data.energy; default_series..., kwargs...)
-    Plots.plot!(plots.iterations, data.T, data.iterations; default_series..., kwargs...)
+    Plots.plot!(plots.energy, data.T, data.energy;
+            default_series..., kwargs..., energy...)
+    Plots.plot!(plots.iterations, data.T, data.iterations;
+            default_series..., kwargs..., iter...)
 end
 
 function save_plots(plots, label)
@@ -90,6 +94,12 @@ function save_plots(plots, label)
         Plots.savefig(plot, "figs/$(label)__$(kind).pdf")
     end
 end
+
+# # SINGLE LITHIUM HYDRIDE EXAMPLE
+# plots = init_plots(0.0, 48.0, 3.0)
+# plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX3.0";
+#     label=false, color=:black, linestyle=:solid, shape=:circle)
+# save_plots(plots, "LiH3.0")
 
 # # HYDROGEN CASE STUDY
 # plots = init_plots(0.0, 30.0, 3.0)
@@ -101,7 +111,7 @@ end
 #     label="3.00Å", color=0, linestyle=:solid, shape=:utriangle)
 # save_plots(plots, "H2")
 
-# # FULL SURVEY
+# # FULL SURVEY UP TO H4
 # plots = init_plots(0.0, 100.0, 3.0)
 # plot_survey!(plots, "jobs/H2EPm_resonant_ΔsMAX3.0";
 #     label="H₂ 0.75Å", color=0, linestyle=:dot, shape=:circle)
@@ -116,6 +126,38 @@ end
 # plot_survey!(plots, "jobs/H4SPm_resonant_ΔsMAX3.0";
 #     label="H₄ 3.00Å", color=2, linestyle=:solid, shape=:utriangle)
 # save_plots(plots, "survey")
+
+# FULL SURVEY
+xticks = [3.0, 10.0, 20.0, 60.0, 400.0, 1500.0]
+plots = init_plots(3.0, 1536.0, 3.0;
+    xscale=:log10,
+    xticks=(xticks, string.(xticks)),
+    xlims=[3.0,2000.0],
+    xminorgrid=false,
+    # legend=:bottomleft,
+    legendfont=Plots.font(7),
+    iter=Dict(
+        :yscale => :log10,
+        :legend => :bottomright,
+    ),
+)
+plot_survey!(plots, "jobs/H2EPm_resonant_ΔsMAX3.0";
+    label="H₂ 0.75Å", color=0, linestyle=:dot, shape=:circle)
+plot_survey!(plots, "jobs/H215_resonant_ΔsMAX3.0";
+    label="H₂ 1.50Å", color=0, linestyle=:dash, shape=:star)
+plot_survey!(plots, "jobs/H2SPm_resonant_ΔsMAX3.0";
+    label="H₂ 3.00Å", color=0, linestyle=:solid, shape=:utriangle)
+plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX3.0";
+    label="LiH 1.50Å", color=1, linestyle=:dash, shape=:star)
+plot_survey!(plots, "jobs/H4EPm_resonant_ΔsMAX3.0";
+    label="H₄ 0.90Å", color=2, linestyle=:dot, shape=:circle)
+plot_survey!(plots, "jobs/H4SPm_resonant_ΔsMAX3.0";
+    label="H₄ 3.00Å", color=2, linestyle=:solid, shape=:utriangle)
+plot_survey!(plots, "jobs/H6EPm_resonant_ΔsMAX3.0";
+    label="H₆ 0.95Å", color=3, linestyle=:dot, shape=:circle)
+plot_survey!(plots, "jobs/H6SPm_resonant_ΔsMAX3.0";
+    label="H₆ 3.00Å", color=3, linestyle=:solid, shape=:utriangle)
+save_plots(plots, "longersurvey")
 
 # # COMPARING DEVICE PARAMETERS
 # plots = init_plots(0.0, 48.0, 3.0)
@@ -152,22 +194,67 @@ end
 #     label="Continuous", color=:black, linestyle=:solid, shape=:circle)
 # save_plots(plots, "windowspacing")
 
-# COMPARING REAL vs COMPLEX, RESONANT vs DETUNED PARAMETERIZATIONS
-plots = init_plots(0.0, 48.0, 3.0)
-plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX3.0";
-    label="RI", color=1, linestyle=:solid, shape=:square)
-plot_survey!(plots, "jobs/lih30_detuned_ΔsMAX3.0";
-    label="RIF", color=2, linestyle=:solid, shape=:circle)
-plot_survey!(plots, "jobs/lih30_resonant.polar_ΔsMAX3.0";
-    label="MP", color=3, linestyle=:dot, shape=:square)
-plot_survey!(plots, "jobs/lih30_detuned.polar_ΔsMAX3.0";
-    label="MPF", color=4, linestyle=:dot, shape=:circle)
-# plot_survey!(plots, "jobs/lih30_resonant.real_ΔsMAX3.0";
-#     label="A", color=3, linestyle=:solid, shape=:square)
-# plot_survey!(plots, "jobs/lih30_detuned.real_ΔsMAX3.0";
-#     label="AF", color=4, linestyle=:dot, shape=:circle)
-plot_survey!(plots, "jobs/lih30_resonant.real_ΔsMAX1.5";
-    label="R", color=5, linestyle=:dash, shape=:square)
-plot_survey!(plots, "jobs/lih30_detuned.real_ΔsMAX1.5";
-    label="RF", color=6, linestyle=:dash, shape=:circle)
-save_plots(plots, "realresonance")
+# # COMPARING REAL vs COMPLEX, RESONANT vs DETUNED PARAMETERIZATIONS
+# plots = init_plots(0.0, 48.0, 3.0)
+# plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX3.0";
+#     label="RI", color=1, linestyle=:solid, shape=:square)
+# plot_survey!(plots, "jobs/lih30_detuned_ΔsMAX3.0";
+#     label="RIF", color=2, linestyle=:solid, shape=:circle)
+# plot_survey!(plots, "jobs/lih30_resonant.polar_ΔsMAX3.0";
+#     label="MP", color=3, linestyle=:dot, shape=:square)
+# plot_survey!(plots, "jobs/lih30_detuned.polar_ΔsMAX3.0";
+#     label="MPF", color=4, linestyle=:dot, shape=:circle)
+# # plot_survey!(plots, "jobs/lih30_resonant.real_ΔsMAX3.0";
+# #     label="A", color=3, linestyle=:solid, shape=:square)
+# # plot_survey!(plots, "jobs/lih30_detuned.real_ΔsMAX3.0";
+# #     label="AF", color=4, linestyle=:dot, shape=:circle)
+# plot_survey!(plots, "jobs/lih30_resonant.real_ΔsMAX1.5";
+#     label="R", color=5, linestyle=:dash, shape=:square)
+# plot_survey!(plots, "jobs/lih30_detuned.real_ΔsMAX1.5";
+#     label="RF", color=6, linestyle=:dash, shape=:circle)
+# save_plots(plots, "realresonance")
+
+# # COMPARING POLAR vs CARTESIAN PARAMETERIZATIONS
+# plots = init_plots(0.0, 48.0, 3.0)
+# plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX3.0";
+#     label="{αβ}", color=1, linestyle=:solid, shape=:circle)
+# plot_survey!(plots, "jobs/lih30_resonant.polar_ΔsMAX3.0";
+#     label="{Aϕ}", color=2, linestyle=:dash, shape=:utriangle)
+# save_plots(plots, "polarcartesian")
+
+# # COMPARING REAL vs COMPLEX, RESONANT vs DETUNED PARAMETERIZATIONS
+# plots = init_plots(0.0, 48.0, 3.0)
+# plot_survey!(plots, "jobs/lih30_resonant_ΔsMAX3.0";
+#     label="{αβ}", color=1, linestyle=:solid, shape=:square)
+# plot_survey!(plots, "jobs/lih30_detuned_ΔsMAX3.0";
+#     label="{αβΔ}", color=2, linestyle=:solid, shape=:circle)
+# # NOTE: Halve window length so number of parameters is consistent.
+# plot_survey!(plots, "jobs/lih30_resonant.real_ΔsMAX1.5";
+#     label="{α}", color=3, linestyle=:dash, shape=:square)
+# plot_survey!(plots, "jobs/lih30_detuned.real_ΔsMAX1.5";
+#     label="{αΔ}", color=4, linestyle=:dash, shape=:circle)
+# save_plots(plots, "resonantdetuned")
+
+# # COMPARING BOND DISTANCES FOR LiH
+# plots = init_plots(0.0, 48.0, 3.0)
+# palette = ColorSchemes.roma
+# ds = 1.0:0.25:4.75
+# for (i, d) in enumerate(ds)
+#     label = d % 1.0 == 0.0 ? "$d Å" : false
+#     plot_survey!(plots, "jobs/scan_LiH_$(d)_resonant_ΔsMAX3.0";
+#         label=label, color=palette[i/length(ds)], linealpha=0.5,
+#         linewidth=2, linestyle=:solid, shape=:none)
+# end
+# save_plots(plots, "dissociation")
+
+# # COMPARING BOND DISTANCES FOR H4
+# plots = init_plots(0.0, 84.0, 3.0)
+# palette = ColorSchemes.roma
+# ds = 0.25:0.25:3.0
+# for (i, d) in enumerate(ds)
+#     label = d % 1.0 == 0.0 ? "$d Å" : false
+#     plot_survey!(plots, "jobs/scan_H4_$(d)_resonant_ΔsMAX3.0";
+#         label=label, color=palette[i/length(ds)], linealpha=0.5,
+#         linewidth=2, linestyle=:solid, shape=:none)
+# end
+# save_plots(plots, "scan_H4")

@@ -90,6 +90,40 @@ module UniformWindows_110123
         end
     end
 
+    import Random
+    """ Duplicate an existing job, but kick the initial state using the given seeds. """
+    function init_shotgun(jobdir, seeds...)
+        # LOAD TEMPLATE JOB
+        if !ispath(jobdir) || !isfile("$jobdir/script.jl")
+            # Also requires serialized setup and meta but it pry does if it has script.jl.
+            error("Shotgunning a job requires a pre-initialized job.")
+        end
+        vars = load(jobdir; trace=false, state=false)
+
+        # MODIFY INITIAL CONDITIONS
+        vars.setup.kick_Ω = vars.setup.ΩMAX
+        vars.setup.kick_φ = Float(π)
+        vars.setup.kick_Δ = vars.setup.ΔMAX
+
+        for seed in seeds
+            vars.outdir = "$jobdir/shotgun_$seed"
+            if ispath(vars.outdir)
+                println("Data already exists in $(vars.outdir).")
+                continue
+            end
+
+            # MODIFY SEEDS
+            Random.seed!(seed)
+            vars.setup.seed_Ω = abs(rand(Int))
+            vars.setup.seed_φ = abs(rand(Int))
+            vars.setup.seed_Δ = abs(rand(Int))
+
+            # INITIALIZE THE NEW JOB DIR
+            save(vars)
+            cp("$jobdir/script.jl", "$(vars.outdir)/script.jl")
+        end
+    end
+
     """ Construct a list of genuine "job" directories within a path. """
     function eachjob(path="jobs")
         jobs = String[]
@@ -144,12 +178,6 @@ module UniformWindows_110123
     function inspect_all(path="jobs")
         for job in eachjob(path)
             inspect(load(job))
-        end
-    end
-
-    function summarize_all(path="jobs")
-        for job in eachjob(path)
-            summarize(load(job))
         end
     end
 
