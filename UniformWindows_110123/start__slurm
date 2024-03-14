@@ -5,10 +5,11 @@
 #SBATCH --account=nmayhall_group
 ##SBATCH --account=personal
 ##SBATCH --account=nmayhall_group-paid
-#SBATCH --nodes=1
+##SBATCH --nodes=1
 #SBATCH --partition normal_q
 #SBATCH --cpus-per-task=1
-#SBATCH --exclusive
+#SBATCH --mem=4G
+##SBATCH --exclusive
 
 MODULE=$(basename $(pwd))
 SCRIPT="
