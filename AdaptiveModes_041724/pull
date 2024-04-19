@@ -1,0 +1,15 @@
+#!/bin/bash
+
+######################
+# This file is super-specific. It works from my desktop computer and none other.
+# Pull a file or directory from ARC into local.
+#
+# Usage: ./pull path
+#
+
+
+MODULE=$(basename $(pwd))
+DIR=$(dirname $1)
+source ~/.zshrc     # LOAD ARC_HOME VARIABLE
+mkdir -p "./$1"     # ENSURE THE DIRECTORY HAS A PERMISSIBLE PATH
+scp -rq "$ARC_HOME/CtrlJobs/$MODULE/$1" "./$DIR"
