@@ -1,0 +1,23 @@
+#!/bin/bash
+
+##########################################################################################
+#
+# Start a Julia repl, with the job package loaded and ready to go.
+#
+# Usage:
+#   ./juliarepl
+#   ./juliarepl --revise
+#
+# The second form will call `using Revise` prior to importing the job package;
+#   this is helpful when debugging or modifying the job package.
+#
+##########################################################################################
+
+MODULE=$(basename $(pwd))
+
+if [[ $1 == "--revise" ]]
+then
+    julia --project=. -e "using Revise; using $MODULE; import $MODULE as JOB" -i
+else
+    julia --project=. -e "using $MODULE; import $MODULE as JOB" -i
+fi
