@@ -76,7 +76,7 @@ function fidelity_plot!(job1, job2)
     Ψ1 = collect_statevector!(job1)
     Ψ2 = collect_statevector!(job2)
 
-    matrix = abs2.(Ψ1' * Ψ2)
+    matrix = abs2.(Ψ2' * Ψ1)
     return Plots.heatmap(matrix;
         ylabel="Ψ2", xlabel="Ψ1", color=:hot,
         aspect_ratio=:equal, #size=(500,500),
@@ -186,122 +186,154 @@ eign = "figs/patheigenbasis"
 corr = "figs/pathcorrelation"
 
 
-##########################################################################################
-#= PLOTTING TRAJECTORIES, FOR EACH PARTICULARLY UNIQUE PLOT =#
+# ##########################################################################################
+# #= PLOTTING TRAJECTORIES, FOR EACH PARTICULARLY UNIQUE PLOT =#
 
 
-Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_44), "$corr/auto.T20_Δs3_44.pdf")
-Plots.savefig(eigenbasis_plot!(T20_Δs3_44), "$eign/T20_Δs3_44.pdf")
-Plots.savefig(perturbasis_plot!(T20_Δs3_44), "$pert/T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_44), "$corr/auto.T20_Δs3_44.pdf")
+# Plots.savefig(eigenbasis_plot!(T20_Δs3_44), "$eign/T20_Δs3_44.pdf")
+# Plots.savefig(perturbasis_plot!(T20_Δs3_44), "$pert/T20_Δs3_44.pdf")
 
-Plots.savefig(fidelity_plot!(T20_Δs3_90, T20_Δs3_90), "$corr/auto.T20_Δs3_90.pdf")
-Plots.savefig(eigenbasis_plot!(T20_Δs3_90), "$eign/T20_Δs3_90.pdf")
-Plots.savefig(perturbasis_plot!(T20_Δs3_90), "$pert/T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T20_Δs3_90, T20_Δs3_90), "$corr/auto.T20_Δs3_90.pdf")
+# Plots.savefig(eigenbasis_plot!(T20_Δs3_90), "$eign/T20_Δs3_90.pdf")
+# Plots.savefig(perturbasis_plot!(T20_Δs3_90), "$pert/T20_Δs3_90.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_14), "$corr/auto.T18_Δs15_14.pdf")
-Plots.savefig(eigenbasis_plot!(T18_Δs15_14), "$eign/T18_Δs15_14.pdf")
-Plots.savefig(perturbasis_plot!(T18_Δs15_14), "$pert/T18_Δs15_14.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_14), "$corr/auto.T18_Δs15_14.pdf")
+# Plots.savefig(eigenbasis_plot!(T18_Δs15_14), "$eign/T18_Δs15_14.pdf")
+# Plots.savefig(perturbasis_plot!(T18_Δs15_14), "$pert/T18_Δs15_14.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_31), "$corr/auto.T18_Δs15_31.pdf")
-Plots.savefig(eigenbasis_plot!(T18_Δs15_31), "$eign/T18_Δs15_31.pdf")
-Plots.savefig(perturbasis_plot!(T18_Δs15_31), "$pert/T18_Δs15_31.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_31), "$corr/auto.T18_Δs15_31.pdf")
+# Plots.savefig(eigenbasis_plot!(T18_Δs15_31), "$eign/T18_Δs15_31.pdf")
+# Plots.savefig(perturbasis_plot!(T18_Δs15_31), "$pert/T18_Δs15_31.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_49), "$corr/auto.T18_Δs15_49.pdf")
-Plots.savefig(eigenbasis_plot!(T18_Δs15_49), "$eign/T18_Δs15_49.pdf")
-Plots.savefig(perturbasis_plot!(T18_Δs15_49), "$pert/T18_Δs15_49.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_49), "$corr/auto.T18_Δs15_49.pdf")
+# Plots.savefig(eigenbasis_plot!(T18_Δs15_49), "$eign/T18_Δs15_49.pdf")
+# Plots.savefig(perturbasis_plot!(T18_Δs15_49), "$pert/T18_Δs15_49.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_39), "$corr/auto.T18_Δs15_39.pdf")
-Plots.savefig(eigenbasis_plot!(T18_Δs15_39), "$eign/T18_Δs15_39.pdf")
-Plots.savefig(perturbasis_plot!(T18_Δs15_39), "$pert/T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_39), "$corr/auto.T18_Δs15_39.pdf")
+# Plots.savefig(eigenbasis_plot!(T18_Δs15_39), "$eign/T18_Δs15_39.pdf")
+# Plots.savefig(perturbasis_plot!(T18_Δs15_39), "$pert/T18_Δs15_39.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_19, T18_Δs15_19), "$corr/auto.T18_Δs15_19.pdf")
-Plots.savefig(eigenbasis_plot!(T18_Δs15_19), "$eign/T18_Δs15_19.pdf")
-Plots.savefig(perturbasis_plot!(T18_Δs15_19), "$pert/T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_19, T18_Δs15_19), "$corr/auto.T18_Δs15_19.pdf")
+# Plots.savefig(eigenbasis_plot!(T18_Δs15_19), "$eign/T18_Δs15_19.pdf")
+# Plots.savefig(perturbasis_plot!(T18_Δs15_19), "$pert/T18_Δs15_19.pdf")
 
-Plots.savefig(fidelity_plot!(T17_Δs0, T17_Δs0), "$corr/auto.T17_Δs0.pdf")
-Plots.savefig(eigenbasis_plot!(T17_Δs0), "$eign/T17_Δs0.pdf")
-Plots.savefig(perturbasis_plot!(T17_Δs0), "$pert/T17_Δs0.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T17_Δs0), "$corr/auto.T17_Δs0.pdf")
+# Plots.savefig(eigenbasis_plot!(T17_Δs0), "$eign/T17_Δs0.pdf")
+# Plots.savefig(perturbasis_plot!(T17_Δs0), "$pert/T17_Δs0.pdf")
 
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T17_Δs0_5), "$corr/auto.T17_Δs0_5.pdf")
-Plots.savefig(eigenbasis_plot!(T17_Δs0_5), "$eign/T17_Δs0_5.pdf")
-Plots.savefig(perturbasis_plot!(T17_Δs0_5), "$pert/T17_Δs0_5.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T17_Δs0_5), "$corr/auto.T17_Δs0_5.pdf")
+# Plots.savefig(eigenbasis_plot!(T17_Δs0_5), "$eign/T17_Δs0_5.pdf")
+# Plots.savefig(perturbasis_plot!(T17_Δs0_5), "$pert/T17_Δs0_5.pdf")
 
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T19_Δs3_26), "$corr/auto.T19_Δs3_26.pdf")
-Plots.savefig(eigenbasis_plot!(T19_Δs3_26), "$eign/T19_Δs3_26.pdf")
-Plots.savefig(perturbasis_plot!(T19_Δs3_26), "$pert/T19_Δs3_26.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T19_Δs3_26), "$corr/auto.T19_Δs3_26.pdf")
+# Plots.savefig(eigenbasis_plot!(T19_Δs3_26), "$eign/T19_Δs3_26.pdf")
+# Plots.savefig(perturbasis_plot!(T19_Δs3_26), "$pert/T19_Δs3_26.pdf")
 
-##########################################################################################
-#= CORRELATING TRAJECTORIES =#
+# ##########################################################################################
+# #= CORRELATING TRAJECTORIES =#
 
-Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_91), "$corr/T20_Δs3_44.T20_Δs3_91.pdf")
-Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_90), "$corr/T20_Δs3_44.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_49), "$corr/T20_Δs3_44.T20_Δs3_49.pdf")
+# Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_91), "$corr/T20_Δs3_44.T20_Δs3_91.pdf")
+# Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_90), "$corr/T20_Δs3_44.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T20_Δs3_44, T20_Δs3_49), "$corr/T20_Δs3_44.T20_Δs3_49.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_31), "$corr/T18_Δs15_14.T18_Δs15_31.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_2), "$corr/T18_Δs15_14.T18_Δs15_2.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_36), "$corr/T18_Δs15_14.T18_Δs15_36.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_49), "$corr/T18_Δs15_14.T18_Δs15_49.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_39), "$corr/T18_Δs15_14.T18_Δs15_39.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_6), "$corr/T18_Δs15_14.T18_Δs15_6.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_19), "$corr/T18_Δs15_14.T18_Δs15_19.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_40), "$corr/T18_Δs15_14.T18_Δs15_40.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_4), "$corr/T18_Δs15_14.T18_Δs15_4.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_15), "$corr/T18_Δs15_14.T18_Δs15_15.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_49), "$corr/T18_Δs15_31.T18_Δs15_49.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_39), "$corr/T18_Δs15_31.T18_Δs15_39.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_6), "$corr/T18_Δs15_31.T18_Δs15_6.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_19), "$corr/T18_Δs15_31.T18_Δs15_19.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_4), "$corr/T18_Δs15_31.T18_Δs15_4.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_15), "$corr/T18_Δs15_31.T18_Δs15_15.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_39), "$corr/T18_Δs15_49.T18_Δs15_39.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_6), "$corr/T18_Δs15_49.T18_Δs15_6.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_19), "$corr/T18_Δs15_49.T18_Δs15_19.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_4), "$corr/T18_Δs15_49.T18_Δs15_4.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_15), "$corr/T18_Δs15_49.T18_Δs15_15.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_19), "$corr/T18_Δs15_39.T18_Δs15_19.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_4), "$corr/T18_Δs15_39.T18_Δs15_4.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_15), "$corr/T18_Δs15_39.T18_Δs15_15.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_31), "$corr/T18_Δs15_14.T18_Δs15_31.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_2), "$corr/T18_Δs15_14.T18_Δs15_2.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_36), "$corr/T18_Δs15_14.T18_Δs15_36.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_49), "$corr/T18_Δs15_14.T18_Δs15_49.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_39), "$corr/T18_Δs15_14.T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_6), "$corr/T18_Δs15_14.T18_Δs15_6.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_19), "$corr/T18_Δs15_14.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_40), "$corr/T18_Δs15_14.T18_Δs15_40.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_4), "$corr/T18_Δs15_14.T18_Δs15_4.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T18_Δs15_15), "$corr/T18_Δs15_14.T18_Δs15_15.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_49), "$corr/T18_Δs15_31.T18_Δs15_49.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_39), "$corr/T18_Δs15_31.T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_6), "$corr/T18_Δs15_31.T18_Δs15_6.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_19), "$corr/T18_Δs15_31.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_4), "$corr/T18_Δs15_31.T18_Δs15_4.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T18_Δs15_15), "$corr/T18_Δs15_31.T18_Δs15_15.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_39), "$corr/T18_Δs15_49.T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_6), "$corr/T18_Δs15_49.T18_Δs15_6.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_19), "$corr/T18_Δs15_49.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_4), "$corr/T18_Δs15_49.T18_Δs15_4.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T18_Δs15_15), "$corr/T18_Δs15_49.T18_Δs15_15.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_19), "$corr/T18_Δs15_39.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_4), "$corr/T18_Δs15_39.T18_Δs15_4.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_39, T18_Δs15_15), "$corr/T18_Δs15_39.T18_Δs15_15.pdf")
 
-Plots.savefig(fidelity_plot!(T17_Δs0, T17_Δs0_3), "$corr/T17_Δs0.T17_Δs0_3.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T17_Δs0_5), "$corr/T17_Δs0.T17_Δs0_5.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_3, T17_Δs0_5), "$corr/T17_Δs0_3.T17_Δs0_5.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T17_Δs0_3), "$corr/T17_Δs0.T17_Δs0_3.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T17_Δs0_5), "$corr/T17_Δs0.T17_Δs0_5.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_3, T17_Δs0_5), "$corr/T17_Δs0_3.T17_Δs0_5.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T20_Δs3_44), "$corr/T18_Δs15_14.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T20_Δs3_44), "$corr/T18_Δs15_31.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T20_Δs3_44), "$corr/T18_Δs15_49.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_39, T20_Δs3_44), "$corr/T18_Δs15_39.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_19, T20_Δs3_44), "$corr/T18_Δs15_19.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T20_Δs3_44), "$corr/T18_Δs15_14.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T20_Δs3_44), "$corr/T18_Δs15_31.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T20_Δs3_44), "$corr/T18_Δs15_49.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_39, T20_Δs3_44), "$corr/T18_Δs15_39.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_19, T20_Δs3_44), "$corr/T18_Δs15_19.T20_Δs3_44.pdf")
 
-Plots.savefig(fidelity_plot!(T18_Δs15_14, T20_Δs3_90), "$corr/T18_Δs15_14.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_31, T20_Δs3_90), "$corr/T18_Δs15_31.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_49, T20_Δs3_90), "$corr/T18_Δs15_49.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_39, T20_Δs3_90), "$corr/T18_Δs15_39.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T18_Δs15_19, T20_Δs3_90), "$corr/T18_Δs15_19.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_14, T20_Δs3_90), "$corr/T18_Δs15_14.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_31, T20_Δs3_90), "$corr/T18_Δs15_31.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_49, T20_Δs3_90), "$corr/T18_Δs15_49.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_39, T20_Δs3_90), "$corr/T18_Δs15_39.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T18_Δs15_19, T20_Δs3_90), "$corr/T18_Δs15_19.T20_Δs3_90.pdf")
 
-Plots.savefig(fidelity_plot!(T17_Δs0, T20_Δs3_44), "$corr/T17_Δs0.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T20_Δs3_90), "$corr/T17_Δs0.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_14), "$corr/T17_Δs0.T18_Δs15_14.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_31), "$corr/T17_Δs0.T18_Δs15_31.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_49), "$corr/T17_Δs0.T18_Δs15_49.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_39), "$corr/T17_Δs0.T18_Δs15_39.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_19), "$corr/T17_Δs0.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T20_Δs3_44), "$corr/T17_Δs0.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T20_Δs3_90), "$corr/T17_Δs0.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_14), "$corr/T17_Δs0.T18_Δs15_14.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_31), "$corr/T17_Δs0.T18_Δs15_31.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_49), "$corr/T17_Δs0.T18_Δs15_49.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_39), "$corr/T17_Δs0.T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0, T18_Δs15_19), "$corr/T17_Δs0.T18_Δs15_19.pdf")
 
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T20_Δs3_44), "$corr/T17_Δs0_5.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T20_Δs3_90), "$corr/T17_Δs0_5.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_14), "$corr/T17_Δs0_5.T18_Δs15_14.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_31), "$corr/T17_Δs0_5.T18_Δs15_31.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_49), "$corr/T17_Δs0_5.T18_Δs15_49.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_39), "$corr/T17_Δs0_5.T18_Δs15_39.pdf")
-Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_19), "$corr/T17_Δs0_5.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T20_Δs3_44), "$corr/T17_Δs0_5.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T20_Δs3_90), "$corr/T17_Δs0_5.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_14), "$corr/T17_Δs0_5.T18_Δs15_14.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_31), "$corr/T17_Δs0_5.T18_Δs15_31.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_49), "$corr/T17_Δs0_5.T18_Δs15_49.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_39), "$corr/T17_Δs0_5.T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T17_Δs0_5, T18_Δs15_19), "$corr/T17_Δs0_5.T18_Δs15_19.pdf")
 
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T17_Δs0), "$corr/T19_Δs3_26.T17_Δs0.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T17_Δs0_5), "$corr/T19_Δs3_26.T17_Δs0_5.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T20_Δs3_44), "$corr/T19_Δs3_26.T20_Δs3_44.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T20_Δs3_90), "$corr/T19_Δs3_26.T20_Δs3_90.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_14), "$corr/T19_Δs3_26.T18_Δs15_14.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_31), "$corr/T19_Δs3_26.T18_Δs15_31.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_49), "$corr/T19_Δs3_26.T18_Δs15_49.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_39), "$corr/T19_Δs3_26.T18_Δs15_39.pdf")
-Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_19), "$corr/T19_Δs3_26.T18_Δs15_19.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T17_Δs0), "$corr/T19_Δs3_26.T17_Δs0.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T17_Δs0_5), "$corr/T19_Δs3_26.T17_Δs0_5.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T20_Δs3_44), "$corr/T19_Δs3_26.T20_Δs3_44.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T20_Δs3_90), "$corr/T19_Δs3_26.T20_Δs3_90.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_14), "$corr/T19_Δs3_26.T18_Δs15_14.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_31), "$corr/T19_Δs3_26.T18_Δs15_31.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_49), "$corr/T19_Δs3_26.T18_Δs15_49.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_39), "$corr/T19_Δs3_26.T18_Δs15_39.pdf")
+# Plots.savefig(fidelity_plot!(T19_Δs3_26, T18_Δs15_19), "$corr/T19_Δs3_26.T18_Δs15_19.pdf")
 
 
+#= Make a specific fidelity plot, with proper axes and labels and stuff. =#
+let
+    Δt = 1/20
+
+    Ψ1 = collect_statevector!(T18_Δs15_49)
+    t1 = 0:Δt:18.0
+    tick1 = 0:3:18
+    label1 = L"Time (ns): $s = 1.5 \mathrm{ns}$"
+
+    Ψ2 = collect_statevector!(T17_Δs0)
+    t2 = 0:Δt:17.0
+    tick2 = [0:3:15..., 17]
+    label2 = L"Time (ns): $s = 0.05 \mathrm{ns}$"
+
+    matrix = abs2.(Ψ2' * Ψ1)
+    plt = Plots.heatmap(t1, t2, matrix;
+        color=:hot,
+        aspect_ratio=:equal, #size=(500,500),
+        xlabel=label1,
+        xlims=[minimum(t1), maximum(t1)],
+        xticks=tick1,
+        xminorticks=3,
+        ylabel=label2,
+        ylims=[minimum(t2), maximum(t2)],
+        yticks=tick2,
+        yminorticks=3,
+        tickfontsize = 11,  # Match the default label size.
+        colorbar_tickfontsize = 11,
+    )
+
+    Plots.savefig(plt, "figs/fidelity.pdf")
+end

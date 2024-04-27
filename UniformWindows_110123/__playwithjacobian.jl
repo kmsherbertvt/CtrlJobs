@@ -52,24 +52,29 @@ jobdirs = (
     #############
     # lih30
     #############
-    α_12   = "jobs/lih30_resonant.real_ΔsMAX1.5/T12.0_W8",
-    αΔ_12  = "jobs/lih30_detuned.real_ΔsMAX1.5/T12.0_W8",
-    αβ_12  = "jobs/lih30_resonant_ΔsMAX3.0/T12.0_W4",
-    αβΔ_12 = "jobs/lih30_detuned_ΔsMAX3.0/T12.0_W4",
-    Aϕ_12  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T12.0_W4",
-    # AϕΔ = "jobs/lih30_detuned.polar_ΔsMAX3.0/T30.0_W10",
+    # α_12   = "jobs/lih30_resonant.real_ΔsMAX1.5/T12.0_W8",
+    # αΔ_12  = "jobs/lih30_detuned.real_ΔsMAX1.5/T12.0_W8",
+    # αβ_12  = "jobs/lih30_resonant_ΔsMAX3.0/T12.0_W4",
+    # αβΔ_12 = "jobs/lih30_detuned_ΔsMAX3.0/T12.0_W4",
+    # Aϕ_12  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T12.0_W4",
+    # Δs0_12 = "jobs/lih30_resonant_perns20/T12.0_W240",
+    # Δs15_12 = "jobs/lih30_resonant_ΔsMAX1.5/T12.0_W8",
 
-    α_30   = "jobs/lih30_resonant.real_ΔsMAX1.5/T30.0_W20",
-    αΔ_30  = "jobs/lih30_detuned.real_ΔsMAX1.5/T30.0_W20",
+    # α_30   = "jobs/lih30_resonant.real_ΔsMAX1.5/T30.0_W20",
+    # αΔ_30  = "jobs/lih30_detuned.real_ΔsMAX1.5/T30.0_W20",
     αβ_30  = "jobs/lih30_resonant_ΔsMAX3.0/T30.0_W10",
-    αβΔ_30 = "jobs/lih30_detuned_ΔsMAX3.0/T30.0_W10",
+    # αβΔ_30 = "jobs/lih30_detuned_ΔsMAX3.0/T30.0_W10",
     Aϕ_30  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T30.0_W10",
+    # Δs0_30 = "jobs/lih30_resonant_perns20/T30.0_W600",
+    # Δs15_30 = "jobs/lih30_resonant_ΔsMAX1.5/T30.0_W20",
 
-    α_48   = "jobs/lih30_resonant.real_ΔsMAX1.5/T48.0_W32",
-    αΔ_48  = "jobs/lih30_detuned.real_ΔsMAX1.5/T48.0_W32",
-    αβ_48  = "jobs/lih30_resonant_ΔsMAX3.0/T48.0_W16",
-    αβΔ_48 = "jobs/lih30_detuned_ΔsMAX3.0/T48.0_W16",
-    Aϕ_48  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T48.0_W16",
+    # α_48   = "jobs/lih30_resonant.real_ΔsMAX1.5/T48.0_W32",
+    # αΔ_48  = "jobs/lih30_detuned.real_ΔsMAX1.5/T48.0_W32",
+    # αβ_48  = "jobs/lih30_resonant_ΔsMAX3.0/T48.0_W16",
+    # αβΔ_48 = "jobs/lih30_detuned_ΔsMAX3.0/T48.0_W16",
+    # Aϕ_48  = "jobs/lih30_resonant.polar_ΔsMAX3.0/T48.0_W16",
+    # Δs0_48 = "jobs/lih30_resonant_perns20/T48.0_W960",
+    # Δs15_48 = "jobs/lih30_resonant_ΔsMAX1.5/T48.0_W32",
 )
 
 ##########################################################################################
@@ -125,21 +130,51 @@ function calculate_perturbation!(jobdir)
     return _!.state.x .- JOB.initial_state().x
 end
 
+function construct_psi!(jobdir)
+    JOB.load!(jobdir; run=false)
+    try include("$(_!.outdir)/script.jl"); catch end
+    return evolve_function(_!.state.x)
+end
+
+function construct_initpsi!(jobdir)
+    JOB.load!(jobdir; run=false)
+    try include("$(_!.outdir)/script.jl"); catch end
+    return evolve_function(JOB.initial_state().x)
+end
+
 ##########################################################################################
 #= CALCULATIONS =#
 
+ψs = NamedTuple(job => construct_psi!(dir) for (job, dir) in pairs(jobdirs))
 jacobians = NamedTuple(job => calculate_jacobian!(dir) for (job, dir) in pairs(jobdirs))
 numparams = NamedTuple(job => size(J,2) for (job, J) in pairs(jacobians))
 perturbs = NamedTuple(job => calculate_perturbation!(dir) for (job, dir) in pairs(jobdirs))
 numhilbert = NamedTuple(job => size(J,1) for (job, J) in pairs(jacobians))
 ranks = NamedTuple(job => rank(J) for (job, J) in pairs(jacobians))
 svds = NamedTuple(job => svd(J) for (job, J) in pairs(jacobians))
+#= NOTE:
+    More careful thinking reveals this svd is not exactly formulated properly.
+    Separating out real and imaginary components induces a metric `η=(I-Y)^(⊕N)`.
+    So this metric should probably appear in the svd?
+    Yet, the eigenvalues of ℜ(J' η J) are exactly the ones we get from this naive svd.
+    As it happens, ℜ(J' η J) is precisely the Fisher Information Metric except
+        without the orthogonal projection term.
+    The analysis is probably most geometrically accurate with the full FIM,
+        so this naive svd is interesting in a "baby steps" kinda way.
+=#
 conditions = NamedTuple(job => cond(J) for (job, J) in pairs(jacobians))
 weights = NamedTuple(job => diag(J'*J) for (job, J) in pairs(jacobians))
 ∂ψs = NamedTuple(job => J[1:2:end,:] .+ im.*J[2:2:end,:] for (job, J) in pairs(jacobians))
 n∂ψs = NamedTuple(job => hcat([∂ψ[:,i]./norm(∂ψ[:,i]) for i in axes(∂ψ,2)]...) for (job, ∂ψ) in pairs(∂ψs))
 volumes = NamedTuple(job => sum(USV.S) for (job, USV) in pairs(svds))
+eucs = NamedTuple(job => (∂ψ = ∂ψs[job]; ψ = ψs[job]; ∂ψ' * ∂ψ) for job in keys(jobdirs))
+cors = NamedTuple(job => (∂ψ = ∂ψs[job]; ψ = ψs[job];
+        (∂ψ'*ψ)*(ψ'*∂ψ)) for job in keys(jobdirs))
+qgts = NamedTuple(job => (eucs[job] .- cors[job]) for job in keys(jobdirs))
+qfis = NamedTuple(job => real.(qgt) for (job, qgt) in pairs(qgts))
+svdFs = NamedTuple(job => svd(F) for (job, F) in pairs(qfis))
 
+initψs = NamedTuple(job => construct_initpsi!(dir) for (job, dir) in pairs(jobdirs))
 initjacobians = NamedTuple(job => calculate_initjacobian!(dir) for (job, dir) in pairs(jobdirs))
 initranks = NamedTuple(job => rank(J) for (job, J) in pairs(initjacobians))
 initsvds = NamedTuple(job => svd(J) for (job, J) in pairs(initjacobians))
@@ -148,6 +183,13 @@ initweights = NamedTuple(job => diag(J'*J) for (job, J) in pairs(initjacobians))
 init∂ψs = NamedTuple(job => J[1:2:end,:] .+ im.*J[2:2:end,:] for (job, J) in pairs(initjacobians))
 initvolumes = NamedTuple(job => sum(USV.S) for (job, USV) in pairs(initsvds))
 initn∂ψs = NamedTuple(job => hcat([∂ψ[:,i]./norm(∂ψ[:,i]) for i in axes(∂ψ,2)]...) for (job, ∂ψ) in pairs(init∂ψs))
+initeucs = NamedTuple(job => (∂ψ = init∂ψs[job]; ψ = initψs[job];
+        ∂ψ' * ∂ψ) for job in keys(jobdirs))
+initcors = NamedTuple(job => (∂ψ = init∂ψs[job]; ψ = initψs[job];
+        (∂ψ'*ψ)*(ψ'*∂ψ)) for job in keys(jobdirs))
+initqgts = NamedTuple(job => (initeucs[job] .- initcors[job]) for job in keys(jobdirs))
+initqfis = NamedTuple(job => real.(qgt) for (job, qgt) in pairs(initqgts))
+initsvdFs = NamedTuple(job => svd(F) for (job, F) in pairs(initqfis))
 
 ##########################################################################################
 #= ANALYSIS =#
@@ -183,48 +225,29 @@ function plot_eigenpulses!(job)
     end
 end
 
-#= TODO:
-What can we argue from the Jacobian?
 
-This is an interesting analysis:
-1. Collapse J back into Hilbert space, each column ∂ψ is J[1:2:end] + im J[2:2:end]
-2. Normalize each column ∂ψ
-3. Calculate revised J' * J, to give ⟨∂iψ|∂jψ⟩
-4. Calculate |⋅|² to give overlap |⟨∂iψ|∂jψ⟩|²
-5. Subtract off the diagonal, which has no information.
-6. Norm of resulting matrix is a measure of parameter redundancy:
-    perturbations of different parameters push in the same direction
+#= Pseudo-SVD analysis of Jacobian ∂j⟨i|ψ⟩ =#
+# goodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(svds))
+# goodranks = NamedTuple(job => length(δ) for (job, δ) in pairs(goodδs))
+# maxδs = NamedTuple(job => first(δ) for (job,δ) in pairs(goodδs))
+# goodconditions = NamedTuple(job => first(δ) / last(δ) for (job, δ) in pairs(goodδs))
 
-Meanwhile, omitting the normalization perhaps gives a sense of "volume",
-    at least the volume accessible locally from the point where the Jacobian is taken.
-Naw this doesn't really work. ∂[ν]ψREF = 0 always, so it doesn't tell anything.
-And generally ∂[ν]ψ is actually quite large (which makes sense; it affects full duration)
-    so this isn't what you are after.
-Naw the most straightforward explanation is that ∂ν lets you push in a direction
-    which you can't get from ∂R, but which you can from ∂I.
-So:
-1. Consider each normalized ∂ν.
-2. Subtract projections from non-∂ν.
-3. What is norm of the remainder?
-    I expect to find norm much larger for RF than for RIF or MPF.
-Ngh, have to renormalize at each step. So I guess, keep track of the norm at each step.
-Noooo, this still isn't going to work. We KNOW there won't be anything left, becasue (eventually) the resonant real pulse DOES optimize. The DIMENSION isn't the issue. It's the VOLUME. How do we measure the VOLUME? We really need to INTEGRATE over something, like the path trajectory. That is too much!
-    And yet, surely, a redundant parameter which is more orthogonal than the others would surely increase the volume? Cross products. Cross products. Yes, that's it. Cross products. A⨯B is small if A and B point in similar directions.
-Gar can we just ask what is the total projection into each basis from all real parameters, all complex parameters, and all frequency parameters?
+# initgoodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(initsvds))
+# initgoodranks = NamedTuple(job => length(δ) for (job, δ) in pairs(initgoodδs))
+# initmaxδs = NamedTuple(job => first(δ) for (job,δ) in pairs(initgoodδs))
+# initgoodconditions = NamedTuple(job => first(δ) / last(δ) for (job, δ) in pairs(initgoodδs))
 
 
 
-=#
-
-
-goodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(svds))
+#= Pseudo-SVD analysis of Quantum Fisher Information metric F = ℜ(QGT) =#
+goodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(svdFs))
 goodranks = NamedTuple(job => length(δ) for (job, δ) in pairs(goodδs))
 maxδs = NamedTuple(job => first(δ) for (job,δ) in pairs(goodδs))
+minδs = NamedTuple(job => last(δ) for (job,δ) in pairs(goodδs))
 goodconditions = NamedTuple(job => first(δ) / last(δ) for (job, δ) in pairs(goodδs))
 
-
-
-initgoodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(initsvds))
+initgoodδs = NamedTuple(job => filter(s -> s > 1e-10, USV.S) for (job, USV) in pairs(initsvdFs))
 initgoodranks = NamedTuple(job => length(δ) for (job, δ) in pairs(initgoodδs))
 initmaxδs = NamedTuple(job => first(δ) for (job,δ) in pairs(initgoodδs))
+initminδs = NamedTuple(job => last(δ) for (job,δ) in pairs(initgoodδs))
 initgoodconditions = NamedTuple(job => first(δ) / last(δ) for (job, δ) in pairs(initgoodδs))
