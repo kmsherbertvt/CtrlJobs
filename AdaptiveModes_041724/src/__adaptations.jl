@@ -172,7 +172,7 @@ module Adaptations
             end
 
             # REGISTER THE GRADIENT NORM
-            scores[i,n] = maximum(abs.(g))
+            scores[i,n] = LinearAlgebra.norm(g)
         end; end
         return scores
     end
