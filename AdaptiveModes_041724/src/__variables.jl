@@ -24,7 +24,7 @@ module Variables
         # HARDWARE BOUNDS
         ΩMAX::Float = 2π * 0.02 # GHz       # LARGEST PULSE AMPLITUDE
         ΔMAX::Float = 2π * 1.00 # GHz       # LARGEST PULSE DETUNING
-        fMAX::Float =      0.34 # GHz       # LARGEST PULSE FREQUENCY (ish)
+        fMAX::Float =      0.17 # GHz       # LARGEST PULSE FREQUENCY (ish)
 
         # PENALTY VARIABLES
         λΩ::Float = 1.0 # Ha                # STRENGTH OF PENALTY TERMS
