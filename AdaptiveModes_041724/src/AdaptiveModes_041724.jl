@@ -73,7 +73,7 @@ module AdaptiveModes_041724
     ######################################################################################
     #= Standard functions to extend pulses adaptively. =#
     include("__adaptations.jl")
-    import .Adaptations: makepool_harmonics
+    import .Adaptations: makepool_harmonics, makepool_complexharmonics
     import .Adaptations: upHk_naive, upHk_slate, upHk_recycle
     import .Adaptations: select_one, select_oneperpulse
     import .Adaptations: prepare_candidate, score_candidates

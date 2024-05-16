@@ -20,7 +20,23 @@ module Adaptations
         which would violate fMAX constraint.
     =#
 
+    """ Each frequency mode contributes two "modes" for real and imaginary part. """
     function makepool_harmonics(vars)
+        T = vars.setup.T
+        fMAX = vars.setup.fMAX
+        nMAX = floor(Int, fMAX * 2T)
+        return [
+            # REAL MODES (freeze the imaginary part B)
+            (CtrlVQE.ConstrainedSignal(Harmonic(0.0, 0.0, n, T), :B, :T)
+                for n in 1:nMAX)...,
+            # IMAGINARY MODES (freeze the real part A)
+            (CtrlVQE.ConstrainedSignal(Harmonic(0.0, 0.0, n, T), :A, :T)
+                for n in 1:nMAX)...,
+        ]
+    end
+
+    """ Each mode has two independent parameters for real and imaginary part. """
+    function makepool_complexharmonics(vars)
         T = vars.setup.T
         fMAX = vars.setup.fMAX
         nMAX = floor(Int, fMAX * 2T)

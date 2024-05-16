@@ -1,8 +1,7 @@
 #=
 
 - Candidates are harmonic modes with nodes at the start and end (aka sine waves).
-- Add one parameter at a time,
-    so that real and imaginary components are considered separate modes.
+- Add one mode at a time, including real and imaginary parameters.
 - Hessian is identity on the updated parameters only.
 
 =#
@@ -23,7 +22,7 @@ basis = CtrlVQE.DRESSED
 frame = CtrlVQE.STATIC
 devicetype = CtrlVQE.FixedFrequencyTransmonDevice
 
-makepool = JOB.makepool_harmonics
+makepool = JOB.makepool_complexharmonics
 select = JOB.select_one
 upHk = JOB.upHk_slate
 
