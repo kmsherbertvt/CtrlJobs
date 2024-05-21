@@ -44,6 +44,41 @@ module Adaptations
     end
 
 
+    """ Windowed square pulses; higher modes have more parameters. """
+    function makepool_square(vars)
+        T = vars.setup.T
+        fMAX = vars.setup.fMAX
+        nMAX = floor(Int, fMAX * 2T)
+
+        return [
+            (CtrlVQE.UniformWindowed(
+                CtrlVQE.ConstrainedSignal(
+                    CtrlVQE.ComplexConstant(zero(Float), zero(Float)),
+                    :B,
+                ), T, n,
+            ) for n in 1:nMAX)...,
+            (CtrlVQE.UniformWindowed(
+                CtrlVQE.ConstrainedSignal(
+                    CtrlVQE.ComplexConstant(zero(Float), zero(Float)),
+                    :A,
+                ), T, n,
+            ) for n in 1:nMAX)...,
+        ]
+    end
+
+    """ Windowed square pulses; higher modes have more parameters. """
+    function makepool_complexsquare(vars)
+        T = vars.setup.T
+        fMAX = vars.setup.fMAX
+        nMAX = floor(Int, fMAX * 2T)
+
+        return [
+            CtrlVQE.UniformWindowed(
+                CtrlVQE.ComplexConstant(zero(Float), zero(Float)),
+                T, n,
+            ) for n in 1:nMAX
+        ]
+    end
 
 
 
@@ -55,16 +90,35 @@ module Adaptations
 
     =#
 
-    function select_one(scores)
+    function select_one(vars, scores)
         i, n = Tuple(argmax(scores))
         return i => n
     end
 
-    function select_oneperpulse(scores)
+    function select_oneperpulse(vars, scores)
         return [(
             (i, n) = Tuple(modes);
             i => n
         ) for modes in vec(argmax(scores; dims=2))]
+    end
+
+    """ Irrespective of scores, select the nth mode for each pulse. """
+    function select_iterative(vars, scores)
+        require_work(vars)
+        n = length(vars.trace.adaptations)
+        # CHECK IF THIS IS A VALID n
+        if n > length(vars.work.pool)
+            #= HACK: We need to trigger a termination!
+                Manually set the last GMAX to 0.
+                Alas, for this hack to do anything,
+                    the end of the adapt loop needs an extra termination check. x_x
+            =#
+            vars.trace.G_max[end] = 0
+
+            return Pair{Int,Int}[]
+        end
+        # NOTE: `select` is called AFTER adapt_trace!, so we should never have n=0 here.
+        return [i => n for i in 1:CtrlVQE.ndrives(vars.work.device)]
     end
 
 
@@ -83,7 +137,7 @@ module Adaptations
         return Matrix{eltype(Hk)}(I, L, L)
     end
 
-    """ Hessian adaptation: Recylce but identity out the subspace of split parameters. """
+    """ Hessian adaptation: Recycle but identity out the subspace of split parameters. """
     function upHk_slate(Hk, imap)
         # FLAG ANY INDICES IN `imap` WHICH ARE DUPLICATED
         imap = deepcopy(imap)
@@ -147,11 +201,25 @@ module Adaptations
         return candidate, imap
     end
 
-    function prepare_candidate(vars, pool, modes::Vector{Tuple{Int,Int}})
-        #= TODO: Add multiple modes simultaneously.
-                The tricky part with square windows was getting the correct index map,
-                    but it should be easier with the modal version.
-        =#
+    function prepare_candidate(vars, modes::Vector{Pair{Int,Int}})
+        require_work(vars)
+        pool = vars.work.pool
+
+        # ADD IN THE NEW MODE
+        candidate = deepcopy(vars.work.device)
+        Ω = deepcopy(vars.state.Ω)
+        for (i, n) in modes
+            push!(
+                CtrlVQE.drivesignal(candidate, i).components,
+                deepcopy(pool[n]),
+            )
+
+            # CONSTRUCT AN INDEX MAP WITH ZEROS FOR THE NEW PARAMETERS
+            append!(Ω[i], zeros(CtrlVQE.Parameters.count(pool[n])))
+        end
+        imap = vcat(Ω..., vars.state.ν)
+
+        return candidate, imap
     end
 
     """ Calculate the total gradient norm for each candidate in a pool. """
@@ -240,6 +308,13 @@ module Adaptations
 
         # PREPARE FREQUENCY INDEXING VECTORS -- Implementation may vary with type someday?
         ν = vars.state.ν
+        #= TODO: 5/21/24 - I've just realized this is an error;
+            which indices are frequencies in the device will shift as parameters are added.
+        The error is probably totally invisible
+            since we're not likely to ever move off resonance with this code base,
+            but *just in case*, I "fixed" this line in the simplified version
+            of this method implemented in `harmonics.frozen`.
+            =#
 
         vars.state = StateVars(x, Hk, n, Ω, ν)
     end
