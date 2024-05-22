@@ -137,8 +137,8 @@ You can see the full list of exports at the top of `src/AdaptiveModes_041724.jl`
 Using this repository, every run of ctrl-(ADAPT-)VQE gets its own "job directory".
 Within this directory gets dumped all the variables used to define the run,
     a copy of the script used to actually *make* the run,
-    a dangerously serialized states of the *current state* of the run
-        which may or may not be completed,
+    a dangerously serialized version of the *current state* of the run
+        (which may or may not be completed),
     as well as any pdf plots generated during the run.
 
 These directories are loosely organized within a `jobs` directory,
@@ -185,9 +185,9 @@ This will initialize job directories in `jobs/H215_harmonics/T24.0/` and `jobs/H
 #### Check on all the jobs for a given script/system
 
 Job directories can be in several states:
-1. Converged: This means the whole ctrl-ADAPT-VQE trajectory saved with this directory has attained some physically meaningful stopping condition.
-2. Terminated: This means the trajectory has attained some computationally meaningful stopping condition.
-3. Running: This means
+1. Converged
+2. Terminated
+3. Running
 4. None of the above
 
 You can see the state of all jobs within a given directory via the `JOB.status` function.
@@ -206,9 +206,9 @@ In this package, "convergence" is attained once either the pool is exhausted or 
 
 If a job is "running", it literally means that the job directory contains a *file* called `running`.
 This has a *large correlation* with the job, um, running, in the background.
-But the correlation factor is, uh, not necessarily 1.0 - more on that later...
+But the correlation factor is, uh, not necessarily 1.0 - more on that momentarily...
 
-The final "state" covers newly-created jobs,
+The fourth status covers newly-created jobs,
     *as well as* any jobs that were interrupted before they could terminate.
 
 Of course, if a job is in state (4), you probably want to *run* the job.
@@ -235,16 +235,17 @@ But for all *other* jobs, it starts the job running *in the background*.
 
 There's kinda a lot that goes behind the scenes here;
     I'll just let you trace the code and ask me questions about it at your leisure.
+
 The main thing to know is that closing the terminal window where you ran `JOB.start` *might* interrupt the jobs (I'm not sure),
     closing VS Code (if you ran `JOB.start` from an integrated terminal) *should* interrupt the jobs (it had *better*),
     and there is some fancy-schmancy way of using the shell command `ps` to check up on it,
     but for unfortunate reasons partly my fault, its output is not very readable,
-    and I've never really really gotten the hang of it.
+    and I've never really gotten the hang of it.
 (In my defence, the primary function of `JOB.start` is running things on ARC, where it works very smoothly,
     and the fact that it can also run things locally is merely a convenience.)
 
 I guess the other thing you should know is that you absolutely can start multiple jobs running simultaneously,
-    and I recommend doing so,
+    and I recommend doing so especially before deciding to look at something else for awhile,
     but starting too many will slow your computer down or crash it.
 Maybe keep it to within, I dunno, ten at a time?
 Maybe less, depending on how many browser tabs you have open...
