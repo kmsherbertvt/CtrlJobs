@@ -46,7 +46,7 @@ module lih30_surveys
 
     sup_naive = (
         job = MODAL,
-        surveydir = "$MODALJOBS/lih30_harmonics.complex.iterative",
+        surveydir = "$MODALJOBS/lih30_harmonics.complex.iterative.cold",
         eMET = 24.0,
         label = "Sup/Naive",
         style = (
@@ -73,6 +73,17 @@ module lih30_surveys
         label = "Sup/Optimal",
         style = (
             color=3,
+            shape=:dtriangle,
+        ),
+    )
+
+    sup_exact = (
+        job = MODAL,
+        surveydir = "$MODALJOBS/lih30_gradients.exact",
+        eMET = 22.0,
+        label = "Sup/Optimal (Complete)",
+        style = (
+            color=4,
             shape=:dtriangle,
         ),
     )
