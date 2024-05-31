@@ -64,7 +64,7 @@ function init_plots(
     P0=[],
     energy=Dict(), iter=Dict(), kwargs...
 )
-    P_axis = __initplot__T_axis(PMIN, PMAX, ΔP)
+    P_axis = __initplot__P_axis(PMIN, PMAX, ΔP)
     energy = __initplot__energy(; P_axis..., kwargs..., energy...)
     iterations = __initplot__iterations(; P_axis..., kwargs..., iter...)
 
@@ -134,6 +134,24 @@ plot_job!(plots, "jobs/lih30_optimal/T24.0";
     label="24 ns", color=4, alpha=1.0, linestyle=:solid, shape=:circle)
 save_plots(plots, "duration_optimal")
 
+# CONTRASTING PULSE DURATIONS: ONENODE
+plots = init_plots(0, 50, 2; P0=[30])
+plot_job!(plots, "jobs/lih30_nodes.one/T18.0";
+    label="18 ns", color=5, alpha=0.1, linestyle=:solid, shape=:ltriangle)
+plot_job!(plots, "jobs/lih30_nodes.one/T19.0";
+    label="19 ns", color=5, alpha=0.25, linestyle=:solid, shape=:none)
+plot_job!(plots, "jobs/lih30_nodes.one/T20.0";
+    label="20 ns", color=5, alpha=0.4, linestyle=:solid, shape=:none)
+plot_job!(plots, "jobs/lih30_nodes.one/T21.0";
+    label="21 ns", color=5, alpha=0.55, linestyle=:solid, shape=:rtriangle)
+plot_job!(plots, "jobs/lih30_nodes.one/T22.0";
+    label="22 ns", color=5, alpha=0.7, linestyle=:solid, shape=:none)
+plot_job!(plots, "jobs/lih30_nodes.one/T23.0";
+    label="23 ns", color=5, alpha=0.85, linestyle=:solid, shape=:none)
+plot_job!(plots, "jobs/lih30_nodes.one/T24.0";
+    label="24 ns", color=5, alpha=1.0, linestyle=:solid, shape=:circle)
+save_plots(plots, "duration_nodes.one")
+
 # CONTRASTING PULSE DURATIONS
 function __sweep__(plots, surveydir, label, color)
     plot_job!(plots, "jobs/$surveydir/T18.0";
@@ -148,6 +166,7 @@ __sweep__(plots, "lih30_bisection", "Bisectal", 1)
 __sweep__(plots, "lih30_random", "Random", 2)
 __sweep__(plots, "lih30_nodes", "Nodal", 3)
 __sweep__(plots, "lih30_optimal", "Optimal", 4)
+__sweep__(plots, "lih30_nodes.one", "One Node", 5)
 # DUMMY PLOTS FOR LEGEND
 for plot in plots
     Plots.plot!(plot, Int[], Int[]; default_series...,
@@ -169,9 +188,9 @@ function __sweep__(plots, surveydir, label, color, ls)
         label=false, color=color, alpha=0.4, linestyle=ls, shape=:rtriangle)
 end
 plots = init_plots(0, 50, 2; P0=[30])
-__sweep__(plots, "lih30_optimal", "One", 4, :solid)
-__sweep__(plots, "lih30_optimal.each", "One per Pulse", 4, :dash)
-__sweep__(plots, "lih30_optimal.all", "One per Window", 4, :dot)
+__sweep__(plots, "lih30_nodes.one", "Select One", 5, :solid)
+__sweep__(plots, "lih30_nodes.oneeach", "Select Each", 5, :dash)
+__sweep__(plots, "lih30_nodes.oneall", "Select All", 5, :dot)
 __sweep__(plots, "lih30_uniform.each", "Uniform", :black, :dash)
 # DUMMY PLOTS FOR LEGEND
 for plot in plots
@@ -183,3 +202,28 @@ for plot in plots
         label="36 ns", color=:black, alpha=0.4, linestyle=:solid, shape=:rtriangle)
 end
 save_plots(plots, "parallel")
+
+# CONTRASTING THE MOST SENSIBLE STRATEGIES
+function __sweep__(plots, surveydir, label, color)
+    plot_job!(plots, "jobs/$surveydir/T18.0";
+        label=false, color=color, alpha=0.4, linestyle=:dot, shape=:ltriangle)
+    plot_job!(plots, "jobs/$surveydir/T22.0";
+        label=label, color=color, alpha=0.8, linestyle=:solid, shape=:circle)
+    plot_job!(plots, "jobs/$surveydir/T36.0";
+        label=false, color=color, alpha=0.4, linestyle=:dash, shape=:rtriangle)
+end
+plots = init_plots(0, 50, 2; P0=[30])
+__sweep__(plots, "lih30_uniform.each", "Uniform (2n/adapt)", :black)
+__sweep__(plots, "lih30_bisection.one", "Bisectal (1/adapt)", 1)
+__sweep__(plots, "lih30_nodes.one", "Optimal (1/adapt)", 5)
+__sweep__(plots, "lih30_optimal", "Optimal (2/adapt)", 4)
+# DUMMY PLOTS FOR LEGEND
+for plot in plots
+    Plots.plot!(plot, Int[], Int[]; default_series...,
+        label="18 ns", color=:black, alpha=0.4, linestyle=:solid, shape=:ltriangle)
+    Plots.plot!(plot, [], []; default_series...,
+        label="22 ns", color=:black, alpha=0.8, linestyle=:solid, shape=:circle)
+    Plots.plot!(plot, [], []; default_series...,
+        label="36 ns", color=:black, alpha=0.4, linestyle=:solid, shape=:rtriangle)
+end
+save_plots(plots, "sensible")

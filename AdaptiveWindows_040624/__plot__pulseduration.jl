@@ -164,6 +164,8 @@ plot_survey!(plots, "jobs/lih30_nodes";
     label="Nodal", color=3, linestyle=:solid, shape=:utriangle)
 plot_survey!(plots, "jobs/lih30_optimal";
     label="Optimal", color=4, linestyle=:solid, shape=:ltriangle)
+plot_survey!(plots, "jobs/lih30_nodes.one";
+    label="One Node", color=5, linestyle=:solid, shape=:rtriangle)
 save_plots(plots, "viability")
 
 # CONTRASTING VIABLILITY - EACH
@@ -194,12 +196,24 @@ save_plots(plots, "viability.all")
 
 # CONTRASTING PARALLELISM
 plots = init_plots(0.0, 48.0, 3.0)
-plot_survey!(plots, "jobs/lih30_optimal";
-    label="One", color=4, linestyle=:solid, shape=:ltriangle)
-plot_survey!(plots, "jobs/lih30_optimal.each";
-    label="One per Pulse", color=4, linestyle=:dash, shape=:ltriangle)
-plot_survey!(plots, "jobs/lih30_optimal.all";
-    label="One per Window", color=4, linestyle=:dot, shape=:ltriangle)
+plot_survey!(plots, "jobs/lih30_nodes.one";
+    label="Select One", color=5, linestyle=:solid, shape=:utriangle)
+plot_survey!(plots, "jobs/lih30_nodes.oneeach";
+    label="Select Each", color=5, linestyle=:dash, shape=:ltriangle)
+plot_survey!(plots, "jobs/lih30_nodes.oneall";
+    label="Select All", color=5, linestyle=:dot, shape=:rtriangle)
 plot_survey!(plots, "jobs/lih30_uniform.each";
     label="Uniform", color=:black, linestyle=:dash, shape=:square)
 save_plots(plots, "parallel")
+
+# CONTRASTING THE MOST SENSIBLE STRATEGIES
+plots = init_plots(0.0, 48.0, 3.0)
+plot_survey!(plots, "jobs/lih30_uniform.each";
+    label="Uniform (n/adapt)", color=:black, linestyle=:solid, shape=:square)
+plot_survey!(plots, "jobs/lih30_bisection.one";
+    label="Bisectal (1/adapt)", color=1, linestyle=:solid, shape=:ltriangle)
+plot_survey!(plots, "jobs/lih30_nodes.one";
+    label="Optimal (1/adapt)", color=5, linestyle=:solid, shape=:ltriangle)
+plot_survey!(plots, "jobs/lih30_optimal";
+    label="Optimal (2n/adapt)", color=4, linestyle=:solid, shape=:ltriangle)
+save_plots(plots, "sensible")
