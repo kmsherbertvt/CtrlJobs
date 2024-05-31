@@ -41,7 +41,7 @@ module Variables
 
     """ How scripts interact with a (fixed) trajectory. Mostly, convergence criteria. """
     @with_kw mutable struct MetaVars
-        G_tol::Float = 1e-3                 # ADAPT CONVERGENCE CRITERION
+        G_tol::Float = 1e-5                 # ADAPT CONVERGENCE CRITERION
         maxadapt::Int = 200                 # NUMBER OF ADAPT ITERATIONS
         update::Int = 500                   # CALL `report` EVERY SO MANY ITERATIONS
     end
@@ -116,7 +116,13 @@ module Variables
 
         # PREPARE FREQUENCY INDEXING VECTORS -- Implementation may vary with type someday?
         ν = collect(L+1:L+nD)
-        work.device isa CtrlVQE.FixedFrequencyTransmonDevice && empty!(ν)
+        any((
+            work.device isa CtrlVQE.FixedFrequencyTransmonDevice,
+            hasproperty(work.device, :base) &&
+                work.device.base isa CtrlVQE.FixedFrequencyTransmonDevice,
+            hasproperty(work.device, :template) &&
+                work.device.template isa CtrlVQE.FixedFrequencyTransmonDevice,
+        )) && empty!(ν)
         L += length(ν)
 
         # PREPARE INITIAL PARAMETER VECTOR

@@ -47,6 +47,46 @@ function load_harmonics!(jobdir)
     return parameters
 end
 
+""" Load the given jobdir to _! and construct a parameter matrix, for coupled runs. """
+function load_coupled!(jobdir)
+    load!(jobdir; run=false)
+    try include("$(_!.outdir)/script.jl") catch end
+
+    nA = length(_!.trace.adaptations)
+
+    parameters = zeros(JOB.Float, nA, nA)
+    for a in 1:nA
+        unarchive!(JOB.adaptid(a))
+        L = length(_!.state.x)
+        parameters[a,1:L] .= _!.state.x
+    end
+
+    return parameters
+end
+
+""" Fill in the active jobdir with parameter trajectories, using a given name. """
+function make_coupledplots!(x, name)
+    JOB.require_work(_!)
+    nD = CtrlVQE.ndrives(_!.work.device)
+    nP = length(_!.work.pool)
+    ΩMAX = _!.setup.ΩMAX
+
+    plt = Plots.plot(;
+        xlabel = "Adaptations",
+        ylabel = "Frequency (GHz)",     # TODO: Normalize gradient signal max->1, so parameters are all on the same scale.
+        ylims = [-ΩMAX, ΩMAX] ./ 2π,
+        legend = :bottomleft,
+    )
+
+    for l in axes(x,2)
+        Plots.plot!(plt, x[:,l] ./ 2π;
+            color = l, ls = :solid, lw = 3, alpha=0.8, label="n=$l",
+        )
+    end
+
+    Plots.savefig(plt, "$(_!.outdir)/$(name).pdf")
+end
+
 """ Fill in the active jobdir with parameter trajectories, using a given name. """
 function make_plots!(x, name)
     JOB.require_work(_!)
@@ -89,6 +129,9 @@ T = 15.0
 
 x  = load_harmonics!("jobs/$(code)_harmonics/T$(T)")
 make_plots!(x, "x")
+
+xG  = load_coupled!("jobs/$(code)_gradients.exact/T$(T)")
+make_coupledplots!(xG, "x")
 
 xF = load_harmonics!("jobs/$(code)_harmonics.frozen/T$(T)")
 xFc = cumsum(xF; dims=1)

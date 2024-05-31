@@ -72,7 +72,7 @@ work = _!.work = JOB.WorkVars(
 state = _!.state = isnothing(_!.state) ? JOB.initial_state() : _!.state
 trace = _!.trace = isnothing(_!.trace) ? JOB.initial_trace() : _!.trace
 
-CtrlVQE.Parameters.bind(device, _!.state.x)
+JOB.adapt_work!()
 lossfn.f_counter[] = isempty(_!.trace.f_calls) ? 0 : last(_!.trace.f_calls)
 lossfn.g_counter[] = isempty(_!.trace.g_calls) ? 0 : last(_!.trace.g_calls)
 
@@ -122,6 +122,8 @@ function do_optimization()
 
     # REPORT RESULTS
     println(bfgs_result)
+    JOB.plot_trace("");
+    flush(stdout)
 
     return JOB.optimization_is_converged()
 end
@@ -137,6 +139,7 @@ end
 #= RUN ADAPT =#
 
 loaded_converged = trace_is_optimized()
+loaded_converged && JOB.adapt_work!()
 
 while loaded_converged || do_optimization()
     JOB.save()

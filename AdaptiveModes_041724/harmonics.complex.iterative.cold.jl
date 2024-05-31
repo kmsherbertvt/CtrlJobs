@@ -1,9 +1,9 @@
 #=
 
 - Candidates are harmonic modes with nodes at the start and end (aka sine waves).
-- Add one parameter at a time,
-    so that real and imaginary components are considered separate modes.
-- Freeze parameters at each optimization.
+- Add modes iteratively, so that in the end, the ansatz consists of all modes,
+    but ALWAYS REINITIALIZE all parameters from zero.
+- Hessian is identity on the updated parameters only.
 
 =#
 
@@ -18,100 +18,16 @@ meta  = _!.meta
 ##########################################################################################
 #= Override adaptive functionality for frozen parameters. =#
 
-""" Totally different and a bit simpler, since we mostly discard previous parameters. """
-function frozen_adapt_state!(vars, modes, upHk)
-    JOB.require_work(vars)
-
-    # PARSE MODES ARGUMENT
-    nD = CtrlVQE.ndrives(vars.work.device)
-    n = [Int[] for i in 1:CtrlVQE.ndrives(vars.work.device)]
-    LΩ = zeros(Int, CtrlVQE.ndrives(vars.work.device))
-    for (i, n_) in (modes isa Pair{Int,Int} ? [modes] : modes)
-        # Register the mode.
-        push!(n[i], n_)
-        # Tabulate the number of parameters for each drive.
-        LΩ[i] += CtrlVQE.Parameters.count(vars.work.pool[n_])
-    end
-    L = sum(LΩ)     # Anachronistically, does NOT include frequency counts.
-
-    # CONSTRUCT THE VECTORS OF ZEROS (plus carrying over frequency)
-    x = [zeros(Float, L); vars.state.x[vars.state.ν]]
-    imap = [zeros(Int, L); vars.state.ν]
-
-    # "UPDATE" THE INVERSE HESSIAN
-    Hk = upHk(vars.state.Hk, imap)
-
-    # UPDATE THE INDEXING VECTORS
-    Ω = [collect(1+sum(LΩ[1:i]):sum(LΩ[1:i+1])) for i in 0:nD-1]
-    ν = isempty(vars.state.ν) ? Int[] : collect(1+L:1+length(vars.state.ν))
-
-    vars.state = JOB.StateVars(x, Hk, n, Ω, ν)
+import LinearAlgebra: I
+""" Do everything that normally gets done, but zero out all parameters. """
+function cold_adapt_state!(vars, modes, upHk)
+    JOB.adapt_state!(vars, modes, upHk)
+    vars.state.x .= 0
+    L = length(vars.state.x)
+    vars.state.Hk = Matrix{eltype(vars.state.Hk)}(I, L, L)
 end
-frozen_adapt_state!(modes, upHk) = frozen_adapt_state!(_!, modes, upHk)
+cold_adapt_state!(modes, upHk) = cold_adapt_state!(_!, modes, upHk)
 
-function frozen_adapt_work!(vars)
-    JOB.require_work(vars)
-    pool = vars.work.pool
-
-    # MUTATE THE DEVICE TO ACCOUNT FOR NEW PULSE SHAPES
-    for i in 1:CtrlVQE.ndrives(vars.work.device)
-        components = [deepcopy(pool[n]) for n in vars.state.n[i]]
-        signal = CtrlVQE.CompositeSignal(deepcopy(vars.work.protopulse), components...)
-        CtrlVQE.set_drivesignal(vars.work.device, i, signal)
-    end
-    CtrlVQE.Parameters.bind(vars.work.device, vars.state.x)
-    #= NOTE: This line handles frequencies. The next section SHOULD never touch them. =#
-
-    # NOW ADD IN ALL THE PULSES FROM PREVIOUS RUNS, FROZEN
-    currentstate = vars.state
-    for a in 1:length(vars.trace.adaptations)
-        # LOAD THE PREVIOUS STATE FROM A FILE
-        unarchive!(vars, JOB.adaptid(a))
-
-        # ASSUME PARAMETERS ARE ORDERED drive -> mode -> signal parameters
-        offset = 0
-        for i in 1:CtrlVQE.ndrives(vars.work.device)
-            for n in vars.state.n[i]
-                # Create the mode with the optimized parameter(s).
-                signal = deepcopy(pool[n])
-                L = CtrlVQE.Parameters.count(signal)
-                CtrlVQE.Parameters.bind(signal, vars.state.x[1+offset:L+offset])
-                offset += L
-
-                # Re-create this signal as a totally constrained harmonic.
-                #= NOTE: This assumes each pool element is a Constrained{Harmonic}.
-                        If we adapt this script to other pools,
-                            I think we'll have no recourse but to edit this line. :/ =#
-                frozensignal = CtrlVQE.ConstrainedSignal(signal.constrained, :A, :B, :T)
-
-                # Add this frozen signal to the active device.
-                push!(CtrlVQE.drivesignal(device, i).components, frozensignal)
-            end
-        end
-    end
-    vars.state = currentstate
-end
-frozen_adapt_work!() = frozen_adapt_work!(_!)
-
-""" Count parameters cumulatively, since the instantaneus count is uninformative. """
-function frozen_adapt_trace!(vars, scores)
-    G_max = isempty(scores) ? 0.0 : maximum(scores)
-    push!(vars.trace.adaptations, last(vars.trace.iterations))
-    push!(vars.trace.poolsize, length(scores))
-    push!(vars.trace.G_max, G_max)
-
-    #= Let's define, for frozen runs, parameters should count CUMULATIVE parameters,
-        rather than the current number (which would just always be the same). =#
-    LΩ = [length(Ω) for Ω in vars.state.Ω]
-    currentstate = vars.state
-    for a in 1:length(vars.trace.adaptations)-1     # NOTHING HAPPENS IN 1st/2nd ADAPTs
-        unarchive!(vars, JOB.adaptid(a))
-        LΩ .+= [length(Ω) for Ω in vars.state.Ω]
-    end
-    vars.state = currentstate
-    push!(vars.trace.parameters, LΩ)
-end
-frozen_adapt_trace!(scores) = frozen_adapt_trace!(_!, scores)
 
 ##########################################################################################
 #= Some script-specific settings. =#
@@ -121,8 +37,9 @@ basis = CtrlVQE.DRESSED
 frame = CtrlVQE.STATIC
 devicetype = CtrlVQE.FixedFrequencyTransmonDevice
 
-makepool = JOB.makepool_harmonics
-select = JOB.select_one
+makepool = JOB.makepool_complexharmonics
+select = JOB.select_iterative
+    # HACK: Alas, `select_iterative` needs a hack at the end of the adapt loop also. =#
 upHk = JOB.upHk_slate
 
 ##########################################################################################
@@ -171,7 +88,7 @@ work = _!.work = JOB.WorkVars(
 state = _!.state = isnothing(_!.state) ? JOB.initial_state() : _!.state
 trace = _!.trace = isnothing(_!.trace) ? JOB.initial_trace() : _!.trace
 
-frozen_adapt_work!()
+JOB.adapt_work!()
 lossfn.f_counter[] = isempty(_!.trace.f_calls) ? 0 : last(_!.trace.f_calls)
 lossfn.g_counter[] = isempty(_!.trace.g_calls) ? 0 : last(_!.trace.g_calls)
 
@@ -184,7 +101,7 @@ import Optim, LineSearches
 
 function do_optimization()
     # ENSURE WORK OBJECTS ARE CONSISTENT WITH PARAMETERS
-    frozen_adapt_work!()
+    JOB.adapt_work!()
 
     # SEED THE VERY FIRST ITERATION WITH INERT NUMBERS
     if isempty(_!.trace.iterations)
@@ -238,7 +155,8 @@ end
 #= RUN ADAPT =#
 
 loaded_converged = trace_is_optimized()
-loaded_converged && frozen_adapt_work!()
+loaded_converged && JOB.adapt_work!()
+#= TODO: Lol to get the restart to work you've got to rewrite each script to script.jl. =#
 
 while loaded_converged || do_optimization()
     JOB.save()
@@ -260,15 +178,17 @@ while loaded_converged || do_optimization()
     if loaded_converged
         global loaded_converged = false
     else
-        frozen_adapt_trace!(_!, scores)
+        JOB.adapt_trace!(_!, scores)
     end
     JOB.adapt_is_terminated() && break
         # NOTE: If pool is empty, update sets G_max to 0.0, which always terminates.
 
     # PERFORM ADAPTATION
     modes = select(scores)
-    frozen_adapt_state!(modes, upHk)
-    frozen_adapt_work!()
+    JOB.adapt_is_terminated() && break
+        # HACK: select_iterative hacks in the last G_max to 0.0, so *now* it terminates.
+    cold_adapt_state!(modes, upHk)
+    JOB.adapt_work!()
 
 end
 JOB.save()

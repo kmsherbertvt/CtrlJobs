@@ -6,6 +6,16 @@ module AdaptiveModes_041724
     const Float = Float64
 
     ######################################################################################
+    #= Extend CtrlVQE a bit. =#
+    include("CoupledDevices.jl")
+    using .CoupledDevices
+    # CoupledDevice, CoupledGlobalAmplitudeBound, CoupledGlobalFrequencyBound
+
+    include("ModalHarmonics.jl")
+    using .ModalHarmonics
+    # ModalHarmonic, ModalHarmonicTransmonDevice, ModalHarmonicAmplitudeBound
+
+    ######################################################################################
     #= Load matrices and reference states given a system code. =#
     include("__system.jl")
     import .Systems: MODEL_PATH, SECTORPATH, EIGEN_PATH
