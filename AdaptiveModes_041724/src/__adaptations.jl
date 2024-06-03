@@ -350,6 +350,7 @@ module Adaptations
     function adapt_is_terminated(vars)
         adapt_is_converged(vars) && return true
 
+        vars.meta.maxadapt == 0 && return true  # Allow a user-made flag to kill a run.
         isnothing(vars.trace) && return false
         isempty(vars.trace.adaptations) && return false
         length(vars.trace.adaptations) >= vars.meta.maxadapt && return true
