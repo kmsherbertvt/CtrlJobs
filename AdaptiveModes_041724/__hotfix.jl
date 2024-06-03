@@ -93,7 +93,9 @@ module Hotfix
         """)
 
         for job in JOB.unterminated_jobs(path)
+            isfile("$job/running") && continue
             vars = JOB.load(job)
+
             flag = hasproblem_infinity(vars) ? "∞ *   " :
                 hasproblem_iterations(vars) ? "I     " :
                 hasproblem_fnRATIO(vars) ? "fn    " :
@@ -112,6 +114,7 @@ module Hotfix
     """
     function fixall_issues!(path="jobs")
         for job in JOB.unterminated_jobs(path)
+            isfile("$job/running") && continue
             vars = JOB.load(job)
 
             if hasproblem_infinity(vars)
