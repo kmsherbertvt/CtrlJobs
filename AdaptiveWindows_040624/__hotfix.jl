@@ -41,7 +41,7 @@ module Hotfix
     """
     function hasproblem_iterations(vars=_!)
         maxiter = last(vars.trace.iterations)
-        return maxiter > vars.setup.maxiter
+        return maxiter ≥ vars.setup.maxiter
     end
 
     function hotfix_iterations!(vars=_!)
@@ -66,7 +66,7 @@ module Hotfix
     """
     function hasproblem_fnRATIO(vars=_!)
         fnRATIO = maximum(vars.trace.f_calls) / last(vars.trace.iterations)
-        return fnRATIO > vars.setup.fnRATIO
+        return fnRATIO ≥ vars.setup.fnRATIO
     end
 
     function hotfix_fnRATIO!(vars=_!)
